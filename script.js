@@ -57,34 +57,39 @@ watermarkImage.onload = () => {
 };
 
 watermark.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  offsetX = e.offsetX;
-  offsetY = e.offsetY;
+  if (!isDragging) { // First click: pick up
+    isDragging = true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+  } else { // Second click: drop
+    isDragging = false;
+    // watermarkPos is already up-to-date from the last mousemove.
+    // The visual position (watermark.style) is also up-to-date via positionWatermark in mousemove.
+    // Now, permanently draw it onto the canvas at its current position.
+    draw();
+  }
+  e.preventDefault(); // Prevents default browser actions like text selection
 });
 
 document.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
+  if (!isDragging) return; // Only move if dragging
+
   const container = canvas.getBoundingClientRect();
   const newX = e.clientX - container.left - offsetX;
   const newY = e.clientY - container.top - offsetY;
 
-  // Update watermarkPos continuously
   watermarkPos.x = newX;
   watermarkPos.y = newY;
 
-  // Update the visual position of the img tag from watermarkPos
-  positionWatermark();
+  positionWatermark(); // Update the visual position of the #watermark img
 });
 
+// Modified mouseup listener: it no longer handles the "drop" action for the watermark.
 document.addEventListener('mouseup', (e) => {
-  if (isDragging) {
-    // watermarkPos is now already up-to-date from the last mousemove.
-    // The img (#watermark) style is also already up-to-date via positionWatermark() in mousemove.
-
-    // Final draw on the canvas with the latest watermarkPos
-    draw();
-    isDragging = false;
-  }
+  // The drop action is now handled by the second mousedown event on the watermark image.
+  // This listener can be removed if it had no other purpose than releasing the drag,
+  // or its original logic for other purposes can be maintained if necessary.
+  // For the watermark drag functionality, it no longer sets isDragging = false or calls draw().
 });
 
 document.getElementById('save-btn').addEventListener('click', () => {
