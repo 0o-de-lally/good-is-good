@@ -3,6 +3,10 @@
   display: inline-block;
 }
 
+#canvas {
+  background-color: #000;
+}
+
 #watermark {
   position: absolute;
   top: 0;
