@@ -1,3 +1,10 @@
+/* Add global font settings */
+body {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  text-transform: uppercase; /* Make all text uppercase */
+}
+
 #canvas-container {
   position: relative;
   display: inline-block;
@@ -39,7 +46,32 @@ div {
   margin-right: 5px;
 }
 
-.url-input button {
+/* Common button styling for consistency */
+button, .custom-file-upload {
   padding: 5px 10px;
   cursor: pointer;
+  background-color: #dadada;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: 'Arial', sans-serif; /* Explicit font family for buttons */
+  font-weight: normal; /* Consistent font weight */
+  text-transform: uppercase; /* Make all button text uppercase */
+  letter-spacing: 0.5px; /* Add slight letter spacing for better readability of uppercase text */
+  transition: background-color 0.3s;
+}
+
+
+button:hover, .custom-file-upload:hover {
+  background-color: #c0c0c0;
+}
+
+button:disabled {
+  visibility: hidden;
+  cursor: not-allowed;
+}
+
+/* Hide the default file input */
+input[type="file"] {
+  display: none;
 }
