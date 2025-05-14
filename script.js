@@ -61,8 +61,10 @@ watermark.addEventListener('mousedown', (e) => {
     isDragging = true;
     offsetX = e.offsetX;
     offsetY = e.offsetY;
+    watermark.classList.add('dragging'); // Add dragging class
   } else { // Second click: drop
     isDragging = false;
+    watermark.classList.remove('dragging'); // Remove dragging class
     // watermarkPos is already up-to-date from the last mousemove.
     // The visual position (watermark.style) is also up-to-date via positionWatermark in mousemove.
     // Now, permanently draw it onto the canvas at its current position.
