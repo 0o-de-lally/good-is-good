@@ -50,11 +50,11 @@ function draw() {
   // Draw the image centered and maintaining aspect ratio
   ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
-  // Add fist and sun emojis to bottom left corner of the image
+  // Add fist and sun emojis to bottom right corner of the image
   ctx.font = "24px Arial";
   const emojiPadding = 10; // Padding from the edge of the image
   const emojiY = offsetY + drawHeight - emojiPadding; // Bottom of the image minus padding
-  const emojiX = offsetX + emojiPadding; // Left of the image plus padding
+  const emojiX = offsetX + drawWidth - emojiPadding - ctx.measureText("✊☀️").width; // Right of the image minus padding and emoji width
   ctx.fillText("✊☀️", emojiX, emojiY);
 
   // Draw watermark on top
