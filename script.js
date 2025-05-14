@@ -5,13 +5,20 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const watermark = document.getElementById('watermark');
 const saveBtn = document.getElementById('save-btn');
+const inverseCheckbox = document.getElementById('inverse-checkbox');
 
 // Disable save button initially
 saveBtn.disabled = true;
 
+// Initialize watermark image
 const watermarkImage = new Image();
 watermarkImage.crossOrigin = 'anonymous';
 watermarkImage.src = watermark.src;
+
+// Initialize pepe image
+const pepeImage = new Image();
+pepeImage.crossOrigin = 'anonymous';
+pepeImage.src = './assets/pepe.png';
 
 let image = new Image();
 let isDragging = false;
@@ -19,13 +26,27 @@ let offsetX = 0, offsetY = 0;
 let watermarkPos = { x: 50, y: 50 };
 let scale = 1;
 
-function positionWatermark() {
+// Unified function to position all elements
+function positionElements() {
+  // Position watermark
   watermark.style.left = watermarkPos.x + 'px';
   watermark.style.top = watermarkPos.y + 'px';
+
+    // We just need to ensure watermark positioning is correct
+  // No need to position Pepe element as it's drawn directly on canvas
+}
+
+// For backward compatibility
+function positionWatermark() {
+  positionElements();
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Fill background with black
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Calculate dimensions to maintain aspect ratio
   let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
@@ -34,41 +55,65 @@ function draw() {
   const canvasRatio = canvas.width / canvas.height;
 
   if (imageRatio > canvasRatio) {
-    // Image is wider than canvas ratio - fit to width
     drawWidth = canvas.width;
     drawHeight = canvas.width / imageRatio;
     offsetY = (canvas.height - drawHeight) / 2;
   } else {
-    // Image is taller than canvas ratio - fit to height
     drawHeight = canvas.height;
     drawWidth = canvas.height * imageRatio;
     offsetX = (canvas.width - drawWidth) / 2;
   }
-
-  // Fill background with black
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Draw the image centered and maintaining aspect ratio
   ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
   // Add fist and sun emojis to bottom right corner of the image
   ctx.font = "24px Arial";
-  const emojiPadding = 10; // Padding from the edge of the image
-  const emojiY = offsetY + drawHeight - emojiPadding; // Bottom of the image minus padding
-  const emojiX = offsetX + drawWidth - emojiPadding - ctx.measureText("✊☀️").width; // Right of the image minus padding and emoji width
+  const emojiPadding = 10;
+  const emojiY = offsetY + drawHeight - emojiPadding;
+  const emojiX = offsetX + drawWidth - emojiPadding - ctx.measureText("✊☀️").width;
+
+  // Draw emojis and potentially Pepe
+  if (inverseCheckbox.checked && pepeImage.complete) {
+    // First draw Pepe
+    const pepeHeight = 24;
+    const pepeWidth = (pepeImage.width / pepeImage.height) * pepeHeight;
+    // Position Pepe to the left of the emojis
+    const pepeX = emojiX - pepeWidth - 5; // 5px spacing between pepe and emoji
+    const pepeY = emojiY - pepeHeight;
+
+    ctx.drawImage(pepeImage, pepeX, pepeY, pepeWidth, pepeHeight);
+  }
+
+  // Draw the emojis
   ctx.fillText("✊☀️", emojiX, emojiY);
 
   // Draw watermark on top
   ctx.drawImage(watermarkImage, watermarkPos.x, watermarkPos.y, watermark.width, watermark.height);
+
+  // Update element positions
+  positionElements();
 }
 
+// Common image loading logic
+function setupLoadedImage() {
+  const maxWidth = 400;
+  canvas.width = maxWidth;
+  canvas.height = Math.round(maxWidth * 3/2);
+
+  scale = image.width > maxWidth ? maxWidth / image.width : 1;
+
+  watermark.style.display = 'block';
+  positionElements();
+  draw();
+
+  saveBtn.disabled = false;
+}
+
+// Event listeners
 upload.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
-  // Enable the save button as soon as a file is selected
-  saveBtn.disabled = false;
 
   const reader = new FileReader();
   reader.onload = function (evt) {
@@ -77,158 +122,84 @@ upload.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-image.onload = () => {
-  const maxWidth = 400;
-  // Set canvas to a fixed 2:3 aspect ratio container
-  canvas.width = maxWidth; // Fixed width of 400px
-  canvas.height = Math.round(maxWidth * 3/2); // Height is 3/2 of width for 2:3 ratio
-
-  // Calculate scale factor for display purposes
-  if (image.width > maxWidth) {
-    scale = maxWidth / image.width;
-  } else {
-    scale = 1;
-  }
-
-  if (watermarkImage.complete) {
-    watermark.style.display = 'block';
-    positionWatermark();
-    draw();
-
-    // Enable save button once image is loaded
-    saveBtn.disabled = false;
-  }
-};
+image.onload = setupLoadedImage;
 
 watermarkImage.onload = () => {
   if (image.complete && image.src) {
-    watermark.style.display = 'block';
-    positionWatermark();
-    draw();
-
-    // Enable save button if image is already loaded
-    saveBtn.disabled = false;
+    setupLoadedImage();
   }
 };
 
 watermark.addEventListener('mousedown', (e) => {
-  if (!isDragging) { // First click: pick up
+  if (!isDragging) {
     isDragging = true;
     offsetX = e.offsetX;
     offsetY = e.offsetY;
-    watermark.classList.add('dragging'); // Add dragging class
-  } else { // Second click: drop
+    watermark.classList.add('dragging');
+  } else {
     isDragging = false;
-    watermark.classList.remove('dragging'); // Remove dragging class
-    // watermarkPos is already up-to-date from the last mousemove.
-    // The visual position (watermark.style) is also up-to-date via positionWatermark in mousemove.
-    // Now, permanently draw it onto the canvas at its current position.
+    watermark.classList.remove('dragging');
     draw();
   }
-  e.preventDefault(); // Prevents default browser actions like text selection
+  e.preventDefault();
 });
 
 document.addEventListener('mousemove', (e) => {
-  if (!isDragging) return; // Only move if dragging
+  if (!isDragging) return;
 
   const container = canvas.getBoundingClientRect();
   let newX = e.clientX - container.left - offsetX;
   let newY = e.clientY - container.top - offsetY;
 
-  // Get watermark dimensions
-  const watermarkWidth = watermark.width;
-  const watermarkHeight = watermark.height;
-
-  // Calculate dimensions to maintain aspect ratio (same as in draw function)
+  // Calculate image boundaries
   let drawWidth, drawHeight, imgOffsetX = 0, imgOffsetY = 0;
   const imageRatio = image.width / image.height;
   const canvasRatio = canvas.width / canvas.height;
 
   if (imageRatio > canvasRatio) {
-    // Image is wider than canvas ratio - fit to width
     drawWidth = canvas.width;
     drawHeight = canvas.width / imageRatio;
     imgOffsetY = (canvas.height - drawHeight) / 2;
   } else {
-    // Image is taller than canvas ratio - fit to height
     drawHeight = canvas.height;
     drawWidth = canvas.height * imageRatio;
     imgOffsetX = (canvas.width - drawWidth) / 2;
   }
 
-  // Enforce boundaries - prevent dragging outside of the image area (not just canvas)
-  // Left boundary of the image
-  newX = Math.max(imgOffsetX, newX);
-  // Top boundary of the image
-  newY = Math.max(imgOffsetY, newY);
-  // Right boundary (considering watermark width and image right edge)
-  newX = Math.min(imgOffsetX + drawWidth - watermarkWidth, newX);
-  // Bottom boundary (considering watermark height and image bottom edge)
-  newY = Math.min(imgOffsetY + drawHeight - watermarkHeight, newY);
+  // Enforce boundaries within image area
+  newX = Math.max(imgOffsetX, Math.min(imgOffsetX + drawWidth - watermark.width, newX));
+  newY = Math.max(imgOffsetY, Math.min(imgOffsetY + drawHeight - watermark.height, newY));
 
   watermarkPos.x = newX;
   watermarkPos.y = newY;
-
-  positionWatermark(); // Update the visual position of the #watermark img
+  positionWatermark();
 });
 
-// Modified mouseup listener: it no longer handles the "drop" action for the watermark.
-document.addEventListener('mouseup', (e) => {
-  // The drop action is now handled by the second mousedown event on the watermark image.
-  // This listener can be removed if it had no other purpose than releasing the drag,
-  // or its original logic for other purposes can be maintained if necessary.
-  // For the watermark drag functionality, it no longer sets isDragging = false or calls draw().
-});
-
-// Load image from URL
 loadUrlBtn.addEventListener('click', () => {
   const url = imageUrlInput.value.trim();
-
   if (!url) {
     alert('Please enter an image URL');
     return;
   }
 
-  // Set crossOrigin to anonymous to avoid CORS issues with external images
   image = new Image();
   image.crossOrigin = 'anonymous';
 
-  // Show loading state
   loadUrlBtn.disabled = true;
   loadUrlBtn.textContent = 'Loading...';
 
-  // Set up the onload handler
   image.onload = () => {
-    const maxWidth = 400;
-    // Set canvas to a fixed 2:3 aspect ratio container
-    canvas.width = maxWidth; // Fixed width of 400px
-    canvas.height = Math.round(maxWidth * 3/2); // Height is 3/2 of width for 2:3 ratio
-
-    // Calculate scale factor for display purposes
-    if (image.width > maxWidth) {
-      scale = maxWidth / image.width;
-    } else {
-      scale = 1;
-    }
-
-    watermark.style.display = 'block';
-    positionWatermark();
-    draw();
-
-    // Enable save button and reset load button
-    saveBtn.disabled = false;
+    setupLoadedImage();
     loadUrlBtn.disabled = false;
     loadUrlBtn.textContent = 'Load Image';
   };
 
-  // Set up error handler
   image.onerror = () => {
     alert('Failed to load image. Please check the URL and try again.');
     loadUrlBtn.disabled = false;
     loadUrlBtn.textContent = 'Load Image';
   };
 
-  // Start loading the image
   image.src = url;
 });
 
@@ -236,11 +207,10 @@ document.getElementById('save-btn').addEventListener('click', () => {
   try {
     draw();
 
-    // Create a temporary canvas for cropping out black borders
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
 
-    // Calculate dimensions to maintain aspect ratio (same as in draw function)
+    // Calculate image dimensions
     let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
     const imageRatio = image.width / image.height;
     const canvasRatio = canvas.width / canvas.height;
@@ -255,36 +225,56 @@ document.getElementById('save-btn').addEventListener('click', () => {
       offsetX = (canvas.width - drawWidth) / 2;
     }
 
-    // Set temp canvas size to match the actual image size (no black borders)
+    // Set temp canvas to image dimensions
     tempCanvas.width = drawWidth;
     tempCanvas.height = drawHeight;
 
-    // Draw only the image portion to the temp canvas (at 0,0 since we're cropping)
+    // Draw image to temp canvas
     tempCtx.drawImage(canvas, offsetX, offsetY, drawWidth, drawHeight, 0, 0, drawWidth, drawHeight);
 
-    // Draw the watermark and emoji at their correct positions relative to the cropped image
-    if (isDragging === false) {  // Only draw if watermark is placed
-      // Adjust watermark position relative to the cropped image
+    // Add watermark if it's positioned
+    if (!isDragging) {
       const adjustedX = watermarkPos.x - offsetX;
       const adjustedY = watermarkPos.y - offsetY;
 
-      // Only draw the watermark if it's actually on the visible image
-      if (adjustedX >= 0 && adjustedY >= 0 &&
-          adjustedX < drawWidth && adjustedY < drawHeight) {
+      if (adjustedX >= 0 && adjustedY >= 0 && adjustedX < drawWidth && adjustedY < drawHeight) {
         tempCtx.drawImage(watermarkImage, adjustedX, adjustedY, watermark.width, watermark.height);
       }
     }
 
-    // Draw the emoji on the cropped canvas
-    tempCtx.font = "24px Arial";
+    // Draw emojis and potentially Pepe
     const emojiPadding = 10;
-    tempCtx.fillText("✊☀️", drawWidth - emojiPadding - tempCtx.measureText("✊☀️").width, drawHeight - emojiPadding);
+    tempCtx.font = "24px Arial";
+    const emojiWidth = tempCtx.measureText("✊☀️").width;
+    const emojiX = drawWidth - emojiPadding - emojiWidth;
+    const emojiY = drawHeight - emojiPadding;
 
+    // Add Pepe if inverse is checked (to the left of the emojis)
+    if (inverseCheckbox.checked && pepeImage.complete) {
+      const pepeHeight = 24; // Match the size used in the draw function
+      const pepeWidth = (pepeImage.width / pepeImage.height) * pepeHeight;
+      const pepeX = emojiX - pepeWidth - 5; // 5px spacing between pepe and emoji
+      const pepeY = emojiY - pepeHeight;
+
+      tempCtx.drawImage(pepeImage, pepeX, pepeY, pepeWidth, pepeHeight);
+    }
+
+    // Draw the emojis
+    tempCtx.fillText("✊☀️", emojiX, emojiY);
+
+    // Download the image
     const link = document.createElement('a');
     link.download = 'watermarked-image.png';
     link.href = tempCanvas.toDataURL('image/png');
     link.click();
   } catch (err) {
     alert("Download failed: " + err.message);
+  }
+});
+
+inverseCheckbox.addEventListener('change', () => {
+  // Only redraw if there's an image loaded
+  if (image.complete && image.src) {
+    draw();
   }
 });

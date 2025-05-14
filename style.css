@@ -29,7 +29,12 @@ body {
 }
 
 #controls {
-  margin-top: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  width: 100%;
+  padding: 5px;
 }
 
 div {
@@ -61,7 +66,6 @@ button, .custom-file-upload {
   transition: background-color 0.3s;
 }
 
-
 button:hover, .custom-file-upload:hover {
   background-color: #c0c0c0;
 }
@@ -74,4 +78,30 @@ button:disabled {
 /* Hide the default file input */
 input[type="file"] {
   display: none;
+}
+
+/* Add styling for the checkbox control */
+.control-option {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 15px;
+  color: #fff; /* Ensuring text is white for visibility on dark background */
+  font-weight: bold; /* Make text bold for better visibility */
+  font-size: 16px; /* Increase font size slightly */
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background */
+  padding: 5px 10px; /* Add some padding around the text and checkbox */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.control-option input[type="checkbox"] {
+  margin-right: 8px; /* Increase space between checkbox and label */
+  transform: scale(1.2); /* Make checkbox slightly larger */
+}
+
+#pepe-element {
+  position: absolute;
+  pointer-events: none; /* This ensures it doesn't interfere with mouse events */
+  z-index: 2; /* Position it above the canvas but below the draggable watermark */
+  user-select: none;
 }
