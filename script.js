@@ -1,4 +1,6 @@
 const upload = document.getElementById('image-upload');
+const imageUrlInput = document.getElementById('image-url');
+const loadUrlBtn = document.getElementById('load-url-btn');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const watermark = document.getElementById('watermark');
@@ -161,12 +163,109 @@ document.addEventListener('mouseup', (e) => {
   // For the watermark drag functionality, it no longer sets isDragging = false or calls draw().
 });
 
+// Load image from URL
+loadUrlBtn.addEventListener('click', () => {
+  const url = imageUrlInput.value.trim();
+
+  if (!url) {
+    alert('Please enter an image URL');
+    return;
+  }
+
+  // Set crossOrigin to anonymous to avoid CORS issues with external images
+  image = new Image();
+  image.crossOrigin = 'anonymous';
+
+  // Show loading state
+  loadUrlBtn.disabled = true;
+  loadUrlBtn.textContent = 'Loading...';
+
+  // Set up the onload handler
+  image.onload = () => {
+    const maxWidth = 400;
+    // Set canvas to a fixed 2:3 aspect ratio container
+    canvas.width = maxWidth; // Fixed width of 400px
+    canvas.height = Math.round(maxWidth * 3/2); // Height is 3/2 of width for 2:3 ratio
+
+    // Calculate scale factor for display purposes
+    if (image.width > maxWidth) {
+      scale = maxWidth / image.width;
+    } else {
+      scale = 1;
+    }
+
+    watermark.style.display = 'block';
+    positionWatermark();
+    draw();
+
+    // Enable save button and reset load button
+    saveBtn.disabled = false;
+    loadUrlBtn.disabled = false;
+    loadUrlBtn.textContent = 'Load Image';
+  };
+
+  // Set up error handler
+  image.onerror = () => {
+    alert('Failed to load image. Please check the URL and try again.');
+    loadUrlBtn.disabled = false;
+    loadUrlBtn.textContent = 'Load Image';
+  };
+
+  // Start loading the image
+  image.src = url;
+});
+
 document.getElementById('save-btn').addEventListener('click', () => {
   try {
     draw();
+
+    // Create a temporary canvas for cropping out black borders
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Calculate dimensions to maintain aspect ratio (same as in draw function)
+    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+    const imageRatio = image.width / image.height;
+    const canvasRatio = canvas.width / canvas.height;
+
+    if (imageRatio > canvasRatio) {
+      drawWidth = canvas.width;
+      drawHeight = canvas.width / imageRatio;
+      offsetY = (canvas.height - drawHeight) / 2;
+    } else {
+      drawHeight = canvas.height;
+      drawWidth = canvas.height * imageRatio;
+      offsetX = (canvas.width - drawWidth) / 2;
+    }
+
+    // Set temp canvas size to match the actual image size (no black borders)
+    tempCanvas.width = drawWidth;
+    tempCanvas.height = drawHeight;
+
+    // Draw only the image portion to the temp canvas (at 0,0 since we're cropping)
+    tempCtx.drawImage(canvas, offsetX, offsetY, drawWidth, drawHeight, 0, 0, drawWidth, drawHeight);
+
+    // Draw the watermark and emoji at their correct positions relative to the cropped image
+    if (isDragging === false) {  // Only draw if watermark is placed
+      // Adjust watermark position relative to the cropped image
+      const adjustedX = watermarkPos.x - offsetX;
+      const adjustedY = watermarkPos.y - offsetY;
+
+      // Only draw the watermark if it's actually on the visible image
+      if (adjustedX >= 0 && adjustedY >= 0 &&
+          adjustedX < drawWidth && adjustedY < drawHeight) {
+        tempCtx.drawImage(watermarkImage, adjustedX, adjustedY, watermark.width, watermark.height);
+      }
+    }
+
+    // Draw the emoji on the cropped canvas
+    tempCtx.font = "24px Arial";
+    const emojiPadding = 10;
+    tempCtx.fillText("✊☀️", drawWidth - emojiPadding - tempCtx.measureText("✊☀️").width, drawHeight - emojiPadding);
+
     const link = document.createElement('a');
     link.download = 'watermarked-image.png';
-    link.href = canvas.toDataURL('image/png');
+    link.href = tempCanvas.toDataURL('image/png');
     link.click();
   } catch (err) {
     alert("Download failed: " + err.message);
