@@ -205,62 +205,74 @@ loadUrlBtn.addEventListener('click', () => {
 
 document.getElementById('save-btn').addEventListener('click', () => {
   try {
-    draw();
+    // Define a scale factor for higher resolution download
+    const downloadScaleFactor = 3; // Increase this for higher resolution
 
+    // Create a temporary canvas for high-resolution rendering
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
 
-    // Calculate image dimensions
-    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+    // Calculate original display dimensions of the image on the main canvas
+    let displayDrawWidth, displayDrawHeight, displayOffsetX = 0, displayOffsetY = 0;
     const imageRatio = image.width / image.height;
-    const canvasRatio = canvas.width / canvas.height;
+    const mainCanvasRatio = canvas.width / canvas.height;
 
-    if (imageRatio > canvasRatio) {
-      drawWidth = canvas.width;
-      drawHeight = canvas.width / imageRatio;
-      offsetY = (canvas.height - drawHeight) / 2;
+    if (imageRatio > mainCanvasRatio) {
+      displayDrawWidth = canvas.width;
+      displayDrawHeight = canvas.width / imageRatio;
+      displayOffsetY = (canvas.height - displayDrawHeight) / 2;
     } else {
-      drawHeight = canvas.height;
-      drawWidth = canvas.height * imageRatio;
-      offsetX = (canvas.width - drawWidth) / 2;
+      displayDrawHeight = canvas.height;
+      displayDrawWidth = canvas.height * imageRatio;
+      displayOffsetX = (canvas.width - displayDrawWidth) / 2;
     }
 
-    // Set temp canvas to image dimensions
-    tempCanvas.width = drawWidth;
-    tempCanvas.height = drawHeight;
+    // Set temp canvas dimensions scaled for high resolution
+    tempCanvas.width = displayDrawWidth * downloadScaleFactor;
+    tempCanvas.height = displayDrawHeight * downloadScaleFactor;
 
-    // Draw image to temp canvas
-    tempCtx.drawImage(canvas, offsetX, offsetY, drawWidth, drawHeight, 0, 0, drawWidth, drawHeight);
+    // Draw the main image onto the temporary canvas, scaled up
+    // We draw the original image (image object) directly to ensure max quality
+    tempCtx.drawImage(image, 0, 0, tempCanvas.width, tempCanvas.height);
 
-    // Add watermark if it's positioned
+    // Add watermark, scaled and positioned correctly
     if (!isDragging) {
-      const adjustedX = watermarkPos.x - offsetX;
-      const adjustedY = watermarkPos.y - offsetY;
+      // Adjust watermark position relative to the image on the main canvas
+      const watermarkRelX = watermarkPos.x - displayOffsetX;
+      const watermarkRelY = watermarkPos.y - displayOffsetY;
 
-      if (adjustedX >= 0 && adjustedY >= 0 && adjustedX < drawWidth && adjustedY < drawHeight) {
-        tempCtx.drawImage(watermarkImage, adjustedX, adjustedY, watermark.width, watermark.height);
+      // Scale watermark properties for the high-resolution canvas
+      const scaledWatermarkX = watermarkRelX * downloadScaleFactor;
+      const scaledWatermarkY = watermarkRelY * downloadScaleFactor;
+      const scaledWatermarkWidth = watermark.width * downloadScaleFactor;
+      const scaledWatermarkHeight = watermark.height * downloadScaleFactor;
+
+      // Draw only if watermark is within the bounds of the scaled image
+      if (scaledWatermarkX + scaledWatermarkWidth > 0 && scaledWatermarkX < tempCanvas.width &&
+          scaledWatermarkY + scaledWatermarkHeight > 0 && scaledWatermarkY < tempCanvas.height) {
+        tempCtx.drawImage(watermarkImage, scaledWatermarkX, scaledWatermarkY, scaledWatermarkWidth, scaledWatermarkHeight);
       }
     }
 
-    // Draw emojis and potentially Pepe
-    const emojiPadding = 10;
-    tempCtx.font = "24px Arial";
-    const emojiWidth = tempCtx.measureText("✊☀️").width;
-    const emojiX = drawWidth - emojiPadding - emojiWidth;
-    const emojiY = drawHeight - emojiPadding;
+    // Draw emojis and potentially Pepe, scaled
+    const emojiSize = 24 * downloadScaleFactor;
+    const emojiPadding = 10 * downloadScaleFactor;
+    tempCtx.font = `${emojiSize}px Arial`;
+    const emojiText = "✊☀️";
+    const emojiWidth = tempCtx.measureText(emojiText).width;
+    const emojiX = tempCanvas.width - emojiPadding - emojiWidth;
+    const emojiY = tempCanvas.height - emojiPadding;
 
-    // Add Pepe if inverse is checked (to the left of the emojis)
     if (inverseCheckbox.checked && pepeImage.complete) {
-      const pepeHeight = 24; // Match the size used in the draw function
+      const pepeHeight = emojiSize;
       const pepeWidth = (pepeImage.width / pepeImage.height) * pepeHeight;
-      const pepeX = emojiX - pepeWidth - 5; // 5px spacing between pepe and emoji
-      const pepeY = emojiY - pepeHeight;
-
+      const pepeSpacing = 5 * downloadScaleFactor;
+      const pepeX = emojiX - pepeWidth - pepeSpacing;
+      const pepeY = emojiY - pepeHeight; // Align bottom of pepe with bottom of emoji text
       tempCtx.drawImage(pepeImage, pepeX, pepeY, pepeWidth, pepeHeight);
     }
 
-    // Draw the emojis
-    tempCtx.fillText("✊☀️", emojiX, emojiY);
+    tempCtx.fillText(emojiText, emojiX, emojiY);
 
     // Download the image
     const link = document.createElement('a');
