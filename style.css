@@ -10,7 +10,11 @@
   cursor: move;
   width: 300px;
   display: none;
-  border: 1px;
+  border: 1px solid transparent; /* Default border, can be transparent or a subtle solid one */
+}
+
+#watermark.dragging {
+  border: 2px dashed #000; /* Dashed border when dragging */
 }
 
 #controls {
