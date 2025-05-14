@@ -2,6 +2,10 @@ const upload = document.getElementById('image-upload');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const watermark = document.getElementById('watermark');
+const saveBtn = document.getElementById('save-btn');
+
+// Disable save button initially
+saveBtn.disabled = true;
 
 const watermarkImage = new Image();
 watermarkImage.crossOrigin = 'anonymous';
@@ -61,6 +65,9 @@ upload.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
+  // Enable the save button as soon as a file is selected
+  saveBtn.disabled = false;
+
   const reader = new FileReader();
   reader.onload = function (evt) {
     image.src = evt.target.result;
@@ -85,6 +92,9 @@ image.onload = () => {
     watermark.style.display = 'block';
     positionWatermark();
     draw();
+
+    // Enable save button once image is loaded
+    saveBtn.disabled = false;
   }
 };
 
@@ -93,6 +103,9 @@ watermarkImage.onload = () => {
     watermark.style.display = 'block';
     positionWatermark();
     draw();
+
+    // Enable save button if image is already loaded
+    saveBtn.disabled = false;
   }
 };
 
