@@ -139,15 +139,32 @@ document.addEventListener('mousemove', (e) => {
   const watermarkWidth = watermark.width;
   const watermarkHeight = watermark.height;
 
-  // Enforce boundaries - prevent dragging outside of canvas
-  // Left boundary
-  newX = Math.max(0, newX);
-  // Top boundary
-  newY = Math.max(0, newY);
-  // Right boundary (considering watermark width)
-  newX = Math.min(canvas.width - watermarkWidth, newX);
-  // Bottom boundary (considering watermark height)
-  newY = Math.min(canvas.height - watermarkHeight, newY);
+  // Calculate dimensions to maintain aspect ratio (same as in draw function)
+  let drawWidth, drawHeight, imgOffsetX = 0, imgOffsetY = 0;
+  const imageRatio = image.width / image.height;
+  const canvasRatio = canvas.width / canvas.height;
+
+  if (imageRatio > canvasRatio) {
+    // Image is wider than canvas ratio - fit to width
+    drawWidth = canvas.width;
+    drawHeight = canvas.width / imageRatio;
+    imgOffsetY = (canvas.height - drawHeight) / 2;
+  } else {
+    // Image is taller than canvas ratio - fit to height
+    drawHeight = canvas.height;
+    drawWidth = canvas.height * imageRatio;
+    imgOffsetX = (canvas.width - drawWidth) / 2;
+  }
+
+  // Enforce boundaries - prevent dragging outside of the image area (not just canvas)
+  // Left boundary of the image
+  newX = Math.max(imgOffsetX, newX);
+  // Top boundary of the image
+  newY = Math.max(imgOffsetY, newY);
+  // Right boundary (considering watermark width and image right edge)
+  newX = Math.min(imgOffsetX + drawWidth - watermarkWidth, newX);
+  // Bottom boundary (considering watermark height and image bottom edge)
+  newY = Math.min(imgOffsetY + drawHeight - watermarkHeight, newY);
 
   watermarkPos.x = newX;
   watermarkPos.y = newY;
