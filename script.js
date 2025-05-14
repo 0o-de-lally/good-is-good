@@ -67,16 +67,21 @@ document.addEventListener('mousemove', (e) => {
   const container = canvas.getBoundingClientRect();
   const newX = e.clientX - container.left - offsetX;
   const newY = e.clientY - container.top - offsetY;
-  watermark.style.left = newX + 'px';
-  watermark.style.top = newY + 'px';
+
+  // Update watermarkPos continuously
+  watermarkPos.x = newX;
+  watermarkPos.y = newY;
+
+  // Update the visual position of the img tag from watermarkPos
+  positionWatermark();
 });
 
 document.addEventListener('mouseup', (e) => {
   if (isDragging) {
-    const container = canvas.getBoundingClientRect();
-    watermarkPos.x = e.clientX - container.left - offsetX;
-    watermarkPos.y = e.clientY - container.top - offsetY;
-    positionWatermark();
+    // watermarkPos is now already up-to-date from the last mousemove.
+    // The img (#watermark) style is also already up-to-date via positionWatermark() in mousemove.
+
+    // Final draw on the canvas with the latest watermarkPos
     draw();
     isDragging = false;
   }
