@@ -20,6 +20,16 @@ const pepeImage = new Image();
 pepeImage.crossOrigin = 'anonymous';
 pepeImage.src = './assets/pepe.png';
 
+// Make sure Pepe image loads fully
+pepeImage.onload = function() {
+  console.log("Pepe image loaded successfully");
+  // If an image is already loaded, we might want to redraw
+  // in case the page loaded with the gaslight checkbox checked
+  if (image.complete && image.src && inverseCheckbox.checked) {
+    draw();
+  }
+};
+
 let image = new Image();
 let isDragging = false;
 let offsetX = 0, offsetY = 0;
@@ -32,8 +42,29 @@ function positionElements() {
   watermark.style.left = watermarkPos.x + 'px';
   watermark.style.top = watermarkPos.y + 'px';
 
-    // We just need to ensure watermark positioning is correct
-  // No need to position Pepe element as it's drawn directly on canvas
+  // Position logo container relative to the actual image, not just the canvas
+  const logoContainer = document.getElementById('logo-container');
+
+  // Calculate image dimensions and position within canvas
+  const imageRatio = image.width / image.height;
+  const canvasRatio = canvas.width / canvas.height;
+  let imgOffsetX = 0, imgOffsetY = 0;
+  let drawWidth, drawHeight;
+
+  if (imageRatio > canvasRatio) {
+    drawWidth = canvas.width;
+    drawHeight = canvas.width / imageRatio;
+    imgOffsetY = (canvas.height - drawHeight) / 2;
+  } else {
+    drawHeight = canvas.height;
+    drawWidth = canvas.height * imageRatio;
+    imgOffsetX = (canvas.width - drawWidth) / 2;
+  }
+
+  // Position logo at the bottom right of the actual image
+  // Add a small padding (10px) from the image edge
+  logoContainer.style.top = (imgOffsetY + drawHeight - logoContainer.offsetHeight - 10) + 'px';
+  logoContainer.style.left = (imgOffsetX + drawWidth - logoContainer.offsetWidth - 10) + 'px';
 }
 
 // For backward compatibility
@@ -67,26 +98,22 @@ function draw() {
   // Draw the image centered and maintaining aspect ratio
   ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
-  // Add fist and sun emojis to bottom right corner of the image
-  ctx.font = "24px Arial";
-  const emojiPadding = 10;
-  const emojiY = offsetY + drawHeight - emojiPadding;
-  const emojiX = offsetX + drawWidth - emojiPadding - ctx.measureText("✊☀️").width;
-
-  // Draw emojis and potentially Pepe
+  // Draw Pepe when gaslight option is checked
   if (inverseCheckbox.checked && pepeImage.complete) {
-    // First draw Pepe
+    // Get the logo container dimensions to position Pepe relative to it
+    const logoContainer = document.getElementById('logo-container');
     const pepeHeight = 24;
     const pepeWidth = (pepeImage.width / pepeImage.height) * pepeHeight;
-    // Position Pepe to the left of the emojis
-    const pepeX = emojiX - pepeWidth - 5; // 5px spacing between pepe and emoji
-    const pepeY = emojiY - pepeHeight;
+
+    // Calculate position: to the left of where the logo container would be
+    const logoWidth = 60; // Approximate width of logo container
+    const pepeX = offsetX + drawWidth - pepeWidth - logoWidth; // Position to the left of the logo
+    const pepeY = offsetY + drawHeight - pepeHeight - 10; // Position near bottom
 
     ctx.drawImage(pepeImage, pepeX, pepeY, pepeWidth, pepeHeight);
   }
 
-  // Draw the emojis
-  ctx.fillText("✊☀️", emojiX, emojiY);
+  // No longer drawing emojis as we're using HTML/SVG
 
   // Draw watermark on top
   ctx.drawImage(watermarkImage, watermarkPos.x, watermarkPos.y, watermark.width, watermark.height);
@@ -104,8 +131,14 @@ function setupLoadedImage() {
   scale = image.width > maxWidth ? maxWidth / image.width : 1;
 
   watermark.style.display = 'block';
-  positionElements();
+
+  // Show the logo container
+  const logoContainer = document.getElementById('logo-container');
+  logoContainer.style.display = 'flex';
+
+  // Need to draw first so the image is rendered, then position elements
   draw();
+  positionElements();
 
   saveBtn.disabled = false;
 }
@@ -254,25 +287,58 @@ document.getElementById('save-btn').addEventListener('click', () => {
       }
     }
 
-    // Draw emojis and potentially Pepe, scaled
-    const emojiSize = 24 * downloadScaleFactor;
-    const emojiPadding = 10 * downloadScaleFactor;
-    tempCtx.font = `${emojiSize}px Arial`;
-    const emojiText = "✊☀️";
-    const emojiWidth = tempCtx.measureText(emojiText).width;
-    const emojiX = tempCanvas.width - emojiPadding - emojiWidth;
-    const emojiY = tempCanvas.height - emojiPadding;
+    // Draw SVG logos and potentially Pepe, scaled
+    const logoSize = 24 * downloadScaleFactor;
+    const logoPadding = 10 * downloadScaleFactor;
+    const logoSpacing = 5 * downloadScaleFactor;
 
+    // Load the SVG images from the DOM
+    const fistSvg = document.querySelector('#logo-container img[alt="carpe"]');
+    const sunSvg = document.querySelector('#logo-container img[alt="diem"]');
+
+    // Create image objects for the SVGs
+    const fistImage = new Image();
+    fistImage.src = fistSvg.src;
+
+    const sunImage = new Image();
+    sunImage.src = sunSvg.src;
+
+    // Calculate positions
+    const totalWidth = (logoSize * 2) + logoSpacing; // Two logos plus spacing
+    const logoX = tempCanvas.width - logoPadding - totalWidth;
+    const logoY = tempCanvas.height - logoPadding - logoSize;
+
+    // Black background for the logo
+    const bgPadding = 5 * downloadScaleFactor;
+    tempCtx.fillStyle = 'black';
+    tempCtx.fillRect(
+      logoX - bgPadding,
+      logoY - bgPadding,
+      totalWidth + (bgPadding * 2),
+      logoSize + (bgPadding * 2)
+    );
+
+    // Draw Pepe if checked
     if (inverseCheckbox.checked && pepeImage.complete) {
-      const pepeHeight = emojiSize;
+      const pepeHeight = logoSize;
       const pepeWidth = (pepeImage.width / pepeImage.height) * pepeHeight;
       const pepeSpacing = 5 * downloadScaleFactor;
-      const pepeX = emojiX - pepeWidth - pepeSpacing;
-      const pepeY = emojiY - pepeHeight; // Align bottom of pepe with bottom of emoji text
+      const pepeX = logoX - pepeWidth - pepeSpacing;
+      const pepeY = logoY; // Align with the logos
       tempCtx.drawImage(pepeImage, pepeX, pepeY, pepeWidth, pepeHeight);
     }
 
-    tempCtx.fillText(emojiText, emojiX, emojiY);
+    // Draw the SVG logos with white filter
+    tempCtx.save();
+    tempCtx.filter = 'invert(1)'; // Make SVGs white
+
+    // Draw fist logo
+    tempCtx.drawImage(fistImage, logoX, logoY, logoSize, logoSize);
+
+    // Draw sun logo
+    tempCtx.drawImage(sunImage, logoX + logoSize + logoSpacing, logoY, logoSize, logoSize);
+
+    tempCtx.restore();
 
     // Download the image
     const link = document.createElement('a');
@@ -287,6 +353,7 @@ document.getElementById('save-btn').addEventListener('click', () => {
 inverseCheckbox.addEventListener('change', () => {
   // Only redraw if there's an image loaded
   if (image.complete && image.src) {
-    draw();
+    console.log("Gaslight mode: " + (inverseCheckbox.checked ? "ON" : "OFF"));
+    draw(); // Redraw with or without Pepe based on checkbox
   }
 });

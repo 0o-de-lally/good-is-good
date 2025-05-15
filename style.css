@@ -10,6 +10,26 @@ body {
   display: inline-block;
 }
 
+#logo-container {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+  z-index: 10;
+  background-color: black;
+  padding: 5px;
+  border-radius: 3px;
+  /* Positioning will be handled by JS */
+  display: none; /* Hide by default until an image is loaded */
+}
+
+#logo-container img {
+  width: 24px;
+  height: 24px;
+  filter: invert(1); /* Makes the SVGs white */
+}
+
 #canvas {
   background-color: #000;
 }
