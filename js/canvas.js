@@ -43,11 +43,25 @@ function positionLogo(targetContext, origDimensions, downloadScaleFactor = 1, fo
 
   // Only draw if logo images are loaded
   if (fistImage.complete && sunImage.complete) {
+    console.log('Drawing logos at:', logoX, logoY, 'size:', logoSize);
     // Draw fist logo
     targetContext.drawImage(fistImage, logoX, logoY, logoSize, logoSize);
 
     // Draw sun logo
     targetContext.drawImage(sunImage, logoX + logoSize + logoSpacing, logoY, logoSize, logoSize);
+  } else {
+    // Debug: Log if images aren't loaded yet
+    console.log('Logo images not yet loaded:', {
+      fistComplete: fistImage.complete,
+      sunComplete: sunImage.complete,
+      fistSrc: fistImage.src,
+      sunSrc: sunImage.src
+    });
+
+    // Try to draw a simple rectangle instead to test positioning
+    targetContext.fillStyle = 'red';
+    targetContext.fillRect(logoX, logoY, logoSize, logoSize);
+    targetContext.fillRect(logoX + logoSize + logoSpacing, logoY, logoSize, logoSize);
   }
 
   targetContext.restore();

@@ -19,6 +19,19 @@ sunImage.src = './assets/8665965_sun_icon.svg';
 // Image load event handlers
 state.image.onload = setupLoadedImage;
 
+// Logo image load handlers - redraw canvas when logos load
+fistImage.onload = () => {
+  if (state.image.complete && state.image.src) {
+    setupLoadedImage();
+  }
+};
+
+sunImage.onload = () => {
+  if (state.image.complete && state.image.src) {
+    setupLoadedImage();
+  }
+};
+
 watermarkImage.onload = () => {
   if (state.image.complete && state.image.src) {
     setupLoadedImage();
