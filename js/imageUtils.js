@@ -37,9 +37,11 @@ export function setupLoadedImage() {
 
   elements.watermark.style.display = 'block';
 
-  // Reset logo position to default when new image is loaded
+  // Reset logo position and scale to default when new image is loaded
   state.logoPos.x = null;
   state.logoPos.y = null;
+  state.logoScale = 1.0;
+  state.logoSelected = false;
 
   // Need to draw first so the image is rendered, then position elements
   draw();

@@ -9,10 +9,11 @@ function positionLogo(targetContext, origDimensions, downloadScaleFactor = 1, fo
 
   const targetCanvas = targetContext.canvas;
 
-  // SVG logo parameters - size scales based on download factor
-  const logoSize = 24 * downloadScaleFactor;
-  const logoPadding = 10 * downloadScaleFactor; // Equal padding for right and bottom
-  const logoSpacing = 10 * downloadScaleFactor;
+  // SVG logo parameters - size scales based on download factor and user scale
+  const baseLogoSize = 24;
+  const logoSize = baseLogoSize * downloadScaleFactor * state.logoScale;
+  const logoPadding = 10 * downloadScaleFactor;
+  const logoSpacing = 15 * downloadScaleFactor * state.logoScale;
   const bgPadding = 5 * downloadScaleFactor;
 
   // Calculate the dimensions to draw at
@@ -64,6 +65,20 @@ function positionLogo(targetContext, origDimensions, downloadScaleFactor = 1, fo
     targetContext.strokeStyle = '#fff';
     targetContext.lineWidth = 2;
     targetContext.setLineDash([5, 5]);
+    targetContext.strokeRect(
+      logoX - bgPadding,
+      logoY - bgPadding,
+      (logoSize * 2) + logoSpacing + (bgPadding * 2),
+      logoSize + (bgPadding * 2)
+    );
+    targetContext.setLineDash([]);
+  }
+
+  // Add selection indicator when logo is selected but not dragging
+  if (state.logoSelected && !state.isDraggingLogo && !forDownload) {
+    targetContext.strokeStyle = '#0066cc';
+    targetContext.lineWidth = 1;
+    targetContext.setLineDash([3, 3]);
     targetContext.strokeRect(
       logoX - bgPadding,
       logoY - bgPadding,

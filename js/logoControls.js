@@ -23,6 +23,7 @@ elements.canvas.addEventListener('mousedown', (e) => {
   // Check if click is on logo
   if (isPointInLogo(mouseX, mouseY)) {
     state.isDraggingLogo = true;
+    state.logoSelected = true; // Mark logo as selected
     state.logoOffsetX = mouseX - state.logoBounds.x;
     state.logoOffsetY = mouseY - state.logoBounds.y;
 
@@ -38,6 +39,9 @@ elements.canvas.addEventListener('mousedown', (e) => {
     // Redraw to show dragging state
     draw();
     e.preventDefault();
+  } else {
+    // Clicked somewhere else - deselect logo
+    state.logoSelected = false;
   }
 });
 
@@ -112,6 +116,62 @@ elements.canvas.addEventListener('touchstart', (e) => {
 
     draw();
     e.preventDefault();
+  }
+});
+
+// Mouse wheel event for scaling logo
+elements.canvas.addEventListener('wheel', (e) => {
+  if (!state.image.complete || !state.image.src) return;
+
+  const rect = elements.canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+
+  // Check if mouse is over logo
+  if (isPointInLogo(mouseX, mouseY)) {
+    e.preventDefault();
+
+    // Scale factor adjustment
+    const scaleStep = 0.1;
+    const minScale = 0.3;
+    const maxScale = 3.0;
+
+    if (e.deltaY < 0) {
+      // Scroll up - make logo larger
+      state.logoScale = Math.min(maxScale, state.logoScale + scaleStep);
+    } else {
+      // Scroll down - make logo smaller
+      state.logoScale = Math.max(minScale, state.logoScale - scaleStep);
+    }
+
+    // Redraw canvas with new scale
+    draw();
+  }
+});
+
+// Keyboard shortcuts for scaling
+document.addEventListener('keydown', (e) => {
+  if (!state.image.complete || !state.image.src) return;
+
+  // Only scale if logo is selected (last clicked on)
+  if (state.logoSelected) {
+    const scaleStep = 0.1;
+    const minScale = 0.3;
+    const maxScale = 3.0;
+
+    if (e.key === '+' || e.key === '=') {
+      e.preventDefault();
+      state.logoScale = Math.min(maxScale, state.logoScale + scaleStep);
+      draw();
+    } else if (e.key === '-' || e.key === '_') {
+      e.preventDefault();
+      state.logoScale = Math.max(minScale, state.logoScale - scaleStep);
+      draw();
+    } else if (e.key === '0') {
+      e.preventDefault();
+      state.logoScale = 1.0; // Reset to default size
+      draw();
+    }
   }
 });
 

@@ -33,5 +33,7 @@ export const state = {
   logoOffsetX: 0,
   logoOffsetY: 0,
   watermarkPos: { x: 50, y: 50 },
-  logoPos: { x: null, y: null } // null means use default positioning
+  logoPos: { x: null, y: null }, // null means use default positioning
+  logoScale: 1.0, // Default scale factor for logo
+  logoSelected: false // Track if logo is currently selected
 };
