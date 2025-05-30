@@ -12,7 +12,7 @@ function positionLogo(targetContext, origDimensions, downloadScaleFactor = 1, fo
   // SVG logo parameters - size scales based on download factor
   const logoSize = 24 * downloadScaleFactor;
   const logoPadding = 10 * downloadScaleFactor; // Equal padding for right and bottom
-  const logoSpacing = 5 * downloadScaleFactor;
+  const logoSpacing = 10 * downloadScaleFactor;
   const bgPadding = 5 * downloadScaleFactor;
 
   // Calculate the dimensions to draw at
@@ -144,6 +144,20 @@ export function draw(targetContext = ctx, downloadScaleFactor = 1, forDownload =
       elements.watermark.width,
       elements.watermark.height
     );
+
+    // Add border when dragging watermark
+    if (state.isDragging) {
+      targetContext.strokeStyle = '#fff';
+      targetContext.lineWidth = 2;
+      targetContext.setLineDash([5, 5]);
+      targetContext.strokeRect(
+        state.watermarkPos.x,
+        state.watermarkPos.y,
+        elements.watermark.width,
+        elements.watermark.height
+      );
+      targetContext.setLineDash([]);
+    }
   } else if (!state.isDragging) {
     // For download, scale the watermark
     // Adjust watermark position relative to the image area

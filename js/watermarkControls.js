@@ -10,12 +10,29 @@ elements.watermark.addEventListener('mousedown', (e) => {
     state.offsetX = e.offsetX;
     state.offsetY = e.offsetY;
     elements.watermark.classList.add('dragging');
+
+    // Set cursor to grabbing
+    elements.watermark.style.cursor = 'grabbing';
   } else {
     state.isDragging = false;
     elements.watermark.classList.remove('dragging');
+    elements.watermark.style.cursor = 'grab';
     draw();
   }
   e.preventDefault();
+});
+
+// Add hover cursor for watermark
+elements.watermark.addEventListener('mouseenter', () => {
+  if (!state.isDragging) {
+    elements.watermark.style.cursor = 'grab';
+  }
+});
+
+elements.watermark.addEventListener('mouseleave', () => {
+  if (!state.isDragging) {
+    elements.watermark.style.cursor = 'move';
+  }
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -35,4 +52,19 @@ document.addEventListener('mousemove', (e) => {
   state.watermarkPos.x = newX;
   state.watermarkPos.y = newY;
   positionElements();
+
+  // Redraw canvas to show dragging border
+  draw();
+});
+
+// Mouse up handler to stop dragging
+document.addEventListener('mouseup', () => {
+  if (state.isDragging) {
+    state.isDragging = false;
+    elements.watermark.classList.remove('dragging');
+    elements.watermark.style.cursor = 'grab';
+
+    // Final redraw without dragging border
+    draw();
+  }
 });
