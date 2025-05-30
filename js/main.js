@@ -3,6 +3,7 @@
 import { elements, state } from './constants.js';
 import './imageLoader.js';
 import './watermarkControls.js';
+import './logoControls.js';
 import './rssLoader.js';
 import './downloadHandler.js';
 

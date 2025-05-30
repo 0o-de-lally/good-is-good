@@ -27,7 +27,11 @@ export const corsProxy = 'https://api.allorigins.win/raw?url=';
 export const state = {
   image: new Image(),
   isDragging: false,
+  isDraggingLogo: false,
   offsetX: 0,
   offsetY: 0,
-  watermarkPos: { x: 50, y: 50 }
+  logoOffsetX: 0,
+  logoOffsetY: 0,
+  watermarkPos: { x: 50, y: 50 },
+  logoPos: { x: null, y: null } // null means use default positioning
 };

@@ -19,14 +19,36 @@ function positionLogo(targetContext, origDimensions, downloadScaleFactor = 1, fo
   let logoX, logoY;
 
   if (forDownload) {
-    // For download: position directly in the image coordinates
-    logoX = targetCanvas.width - logoPadding - (logoSize * 2) - logoSpacing;
-    logoY = targetCanvas.height - logoPadding - logoSize; // Same padding on bottom as on right
+    if (state.logoPos.x !== null && state.logoPos.y !== null) {
+      // Use custom position relative to image area for download
+      const logoRelX = state.logoPos.x - origDimensions.offsetX;
+      const logoRelY = state.logoPos.y - origDimensions.offsetY;
+      logoX = logoRelX * downloadScaleFactor;
+      logoY = logoRelY * downloadScaleFactor;
+    } else {
+      // For download: position directly in the image coordinates (default position)
+      logoX = targetCanvas.width - logoPadding - (logoSize * 2) - logoSpacing;
+      logoY = targetCanvas.height - logoPadding - logoSize;
+    }
   } else {
-    // For display: position relative to the image area in the canvas
-    logoX = origDimensions.offsetX + origDimensions.drawWidth - logoPadding - (logoSize * 2) - logoSpacing;
-    logoY = origDimensions.offsetY + origDimensions.drawHeight - logoPadding - logoSize; // Same padding on bottom as on right
+    if (state.logoPos.x !== null && state.logoPos.y !== null) {
+      // Use custom dragged position
+      logoX = state.logoPos.x;
+      logoY = state.logoPos.y;
+    } else {
+      // For display: position relative to the image area in the canvas (default position)
+      logoX = origDimensions.offsetX + origDimensions.drawWidth - logoPadding - (logoSize * 2) - logoSpacing;
+      logoY = origDimensions.offsetY + origDimensions.drawHeight - logoPadding - logoSize;
+    }
   }
+
+  // Store the logo bounds for hit detection
+  state.logoBounds = {
+    x: logoX - bgPadding,
+    y: logoY - bgPadding,
+    width: (logoSize * 2) + logoSpacing + (bgPadding * 2),
+    height: logoSize + (bgPadding * 2)
+  };
 
   // Black background for logo
   targetContext.fillStyle = 'black';
@@ -37,13 +59,26 @@ function positionLogo(targetContext, origDimensions, downloadScaleFactor = 1, fo
     logoSize + (bgPadding * 2)
   );
 
+  // Add border when dragging
+  if (state.isDraggingLogo && !forDownload) {
+    targetContext.strokeStyle = '#fff';
+    targetContext.lineWidth = 2;
+    targetContext.setLineDash([5, 5]);
+    targetContext.strokeRect(
+      logoX - bgPadding,
+      logoY - bgPadding,
+      (logoSize * 2) + logoSpacing + (bgPadding * 2),
+      logoSize + (bgPadding * 2)
+    );
+    targetContext.setLineDash([]);
+  }
+
   // Draw SVG logos with white filter
   targetContext.save();
   targetContext.filter = 'invert(1)';
 
   // Only draw if logo images are loaded
   if (fistImage.complete && sunImage.complete) {
-    console.log('Drawing logos at:', logoX, logoY, 'size:', logoSize);
     // Draw fist logo
     targetContext.drawImage(fistImage, logoX, logoY, logoSize, logoSize);
 
