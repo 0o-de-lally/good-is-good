@@ -200,7 +200,6 @@ elements.loadNewsBtn.addEventListener('click', async () => {
 
     if (images.length === 0) {
       elements.imageGrid.innerHTML = '<p>No images found in RSS feeds. Please try again later.</p>';
-      elements.newsGallery.style.display = 'block';
       return;
     }
 
@@ -238,13 +237,9 @@ elements.loadNewsBtn.addEventListener('click', async () => {
       elements.imageGrid.appendChild(imageItem);
     });
 
-    // Show the gallery
-    elements.newsGallery.style.display = 'block';
-
   } catch (error) {
     console.error('Error fetching RSS images:', error);
     elements.imageGrid.innerHTML = '<p>Failed to load news images. Please check your internet connection and try again.</p>';
-    elements.newsGallery.style.display = 'block';
   } finally {
     elements.loadNewsBtn.disabled = false;
     elements.loadNewsBtn.textContent = 'Inspiration';

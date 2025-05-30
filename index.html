@@ -9,33 +9,42 @@
 
 <body>
   <h1>GOOD IS GOOD</h1>
-  <div>
-    <label class="custom-file-upload">
-      Upload Image
-      <input type="file" id="image-upload" accept="image/*">
-    </label>
-  </div>
-  <div>
-    <div class="url-input">
-      <label for="image-url">Or paste image URL: </label>
-      <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
-      <button id="load-url-btn">Load Image</button>
+  <div class="main-container">
+    <!-- Left Column: Image Editor (2/3 width) -->
+    <div class="left-column">
+      <div>
+        <label class="custom-file-upload">
+          Upload Image
+          <input type="file" id="image-upload" accept="image/*">
+        </label>
+      </div>
+      <div>
+        <div class="url-input">
+          <label for="image-url">Or paste image URL: </label>
+          <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
+          <button id="load-url-btn">Load Image</button>
+        </div>
+      </div>
+      <div>
+        <div id="canvas-container">
+          <canvas id="canvas"></canvas>
+          <img id="watermark" src="overlay.png" alt="Watermark">
+        </div>
+        <div id="controls">
+          <button id="save-btn">Download Image</button>
+        </div>
+      </div>
     </div>
-  </div>
-  <div>
-    <div id="canvas-container">
-      <canvas id="canvas"></canvas>
-      <img id="watermark" src="overlay.png" alt="Watermark">
+
+    <!-- Right Column: Inspiration (1/3 width) -->
+    <div class="right-column">
+      <div>
+        <button id="load-news-btn">Inspiration</button>
+      </div>
+      <div id="news-gallery">
+        <div id="image-grid"></div>
+      </div>
     </div>
-    <div id="controls">
-      <button id="save-btn">Download Image</button>
-    </div>
-  </div>
-  <div>
-    <button id="load-news-btn">Inspiration</button>
-  </div>
-  <div id="news-gallery" style="display: none;">
-    <div id="image-grid"></div>
   </div>
   <div>
     <script type="module" src="js/main.js"></script>
