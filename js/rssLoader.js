@@ -185,12 +185,12 @@ function getSourceName(url) {
 }
 
 // RSS gallery event handler
-elements.loadReutersBtn.addEventListener('click', async () => {
+elements.loadNewsBtn.addEventListener('click', async () => {
   // First run the test
   await testRSSParsing();
 
-  elements.loadReutersBtn.disabled = true;
-  elements.loadReutersBtn.textContent = 'Loading...';
+  elements.loadNewsBtn.disabled = true;
+  elements.loadNewsBtn.textContent = 'Loading...';
 
   // Clear existing content
   elements.imageGrid.innerHTML = '';
@@ -200,14 +200,14 @@ elements.loadReutersBtn.addEventListener('click', async () => {
 
     if (images.length === 0) {
       elements.imageGrid.innerHTML = '<p>No images found in RSS feeds. Please try again later.</p>';
-      elements.reutersGallery.style.display = 'block';
+      elements.newsGallery.style.display = 'block';
       return;
     }
 
     // Display fetched images
     images.forEach((item, index) => {
       const imageItem = document.createElement('div');
-      imageItem.className = 'reuters-image-item';
+      imageItem.className = 'news-image-item';
 
       const img = document.createElement('img');
       img.src = item.imageUrl;
@@ -239,14 +239,14 @@ elements.loadReutersBtn.addEventListener('click', async () => {
     });
 
     // Show the gallery
-    elements.reutersGallery.style.display = 'block';
+    elements.newsGallery.style.display = 'block';
 
   } catch (error) {
     console.error('Error fetching RSS images:', error);
     elements.imageGrid.innerHTML = '<p>Failed to load news images. Please check your internet connection and try again.</p>';
-    elements.reutersGallery.style.display = 'block';
+    elements.newsGallery.style.display = 'block';
   } finally {
-    elements.loadReutersBtn.disabled = false;
-    elements.loadReutersBtn.textContent = 'Load Best Photographs from News Sources';
+    elements.loadNewsBtn.disabled = false;
+    elements.loadNewsBtn.textContent = 'Inspiration';
   }
 });

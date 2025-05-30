@@ -108,8 +108,8 @@ input[type="file"] {
   user-select: none;
 }
 
-/* Reuters Gallery Styles */
-#reuters-gallery {
+/* News Gallery Styles */
+#news-gallery {
   margin: 20px;
   padding: 20px;
   border: 1px solid #ccc;
@@ -117,7 +117,7 @@ input[type="file"] {
   background-color: #f9f9f9;
 }
 
-#reuters-gallery h2 {
+#news-gallery h2 {
   text-align: center;
   margin-bottom: 20px;
   color: #333;
@@ -130,7 +130,7 @@ input[type="file"] {
   margin-top: 20px;
 }
 
-.reuters-image-item {
+.news-image-item {
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
@@ -140,18 +140,18 @@ input[type="file"] {
   cursor: pointer;
 }
 
-.reuters-image-item:hover {
+.news-image-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-.reuters-image-item img {
+.news-image-item img {
   width: 100%;
   height: 200px;
   object-fit: cover;
 }
 
-.reuters-image-item .caption {
+.news-image-item .caption {
   padding: 10px;
   font-size: 14px;
   line-height: 1.4;
@@ -161,7 +161,7 @@ input[type="file"] {
   overflow-y: auto;
 }
 
-.reuters-image-item .caption strong {
+.news-image-item .caption strong {
   display: block;
   margin-bottom: 5px;
   color: #000;
@@ -184,7 +184,7 @@ input[type="file"] {
   color: #666;
 }
 
-#load-reuters-btn {
+#load-news-btn {
   background-color: #0066cc;
   color: white;
   border: none;
@@ -195,11 +195,11 @@ input[type="file"] {
   text-transform: uppercase;
 }
 
-#load-reuters-btn:hover {
+#load-news-btn:hover {
   background-color: #0052a3;
 }
 
-#load-reuters-btn:disabled {
+#load-news-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
