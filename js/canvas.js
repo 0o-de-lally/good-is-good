@@ -74,20 +74,6 @@ function positionLogo(targetContext, origDimensions, downloadScaleFactor = 1, fo
     targetContext.setLineDash([]);
   }
 
-  // Add selection indicator when logo is selected but not dragging
-  if (state.logoSelected && !state.isDraggingLogo && !forDownload) {
-    targetContext.strokeStyle = '#0066cc';
-    targetContext.lineWidth = 1;
-    targetContext.setLineDash([3, 3]);
-    targetContext.strokeRect(
-      logoX - bgPadding,
-      logoY - bgPadding,
-      (logoSize * 2) + logoSpacing + (bgPadding * 2),
-      logoSize + (bgPadding * 2)
-    );
-    targetContext.setLineDash([]);
-  }
-
   // Draw SVG logos with white filter
   targetContext.save();
   targetContext.filter = 'invert(1)';

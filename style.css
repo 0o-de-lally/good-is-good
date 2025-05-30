@@ -348,3 +348,57 @@ input[type="file"] {
   cursor: not-allowed;
   box-shadow: none;
 }
+
+/* Instructions styling */
+.instructions {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #ffffff;
+  background-color: #000000;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+.instructions h3 {
+  margin: 0 0 10px 0;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.instructions ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: none;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.4;
+  text-transform: none;
+}
+
+.instructions li::before {
+  content: '> ';
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.instructions strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.instructions kbd {
+  background-color: #333333;
+  color: #ffffff;
+  padding: 2px 6px;
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-weight: 700;
+}
